@@ -12,7 +12,8 @@ current = 'https://n.cg.163.com/api/v2/client-settings/@current'
 
 
 cookies = sys.argv[1].split('#')
-teletoken = sys.argv[3]
+teleid = ""  # 不设置 Telegram 用户 ID
+teletoken = ""  # 不设置 Telegram Bot Token
 sckey = sys.argv[4]
 qqkey = sys.argv[5]
 ppkey = sys.argv[6]
