@@ -1,4 +1,5 @@
 import sys
+import os
 import requests as r
 import json
 import telepot
@@ -10,13 +11,16 @@ pp_enable = False
 sign_url = 'https://n.cg.163.com/api/v2/sign-today'
 current = 'https://n.cg.163.com/api/v2/client-settings/@current'
 
+# 从GitHub Secrets环境变量读取Cookie，不再读取命令行参数
+cookie_raw = os.environ.get("COOKIE", "")
+cookies = cookie_raw.split('#')
 
-cookies = sys.argv[1].split('#')
-teleid = ""  # 不设置 Telegram 用户 ID
-teletoken = ""  # 不设置 Telegram Bot Token
-sckey = sys.argv[4]
-qqkey = sys.argv[5]
-ppkey = sys.argv[6]
+# 所有推送密钥全部置空，关闭推送功能
+teleid = ""
+teletoken = ""
+sckey = ""
+qqkey = ""
+ppkey = ""
 
 if cookies == "" or cookies == []:
     print('[网易云游戏自动签到]未设置cookie，正在退出……')
@@ -124,7 +128,9 @@ if __name__ == "__main__":
     failure = []
     msg = []
     for i in cookies:
-        cookie = i
+        cookie = i.strip()
+        if not cookie:
+            continue
         autherror = False
         signerror = False
         sign_return = None
@@ -132,14 +138,14 @@ if __name__ == "__main__":
         try:
             me = getme(current, cookie)
         except:
-            message = '第{}个账号验证失败！请检查Cookie是否过期！或者附上报错信息到 https://github.com/GamerNoTitle/wyycg-autosignin/issues 发起issue'.format(
+            message = '第{}个账号验证失败！请检查Cookie是否过期！'.format(
                 cookies.index(i) + 1)
             failure.append(cookie)
             msg.append(message)
             autherror = True
 
         if me.status_code != 200 and not autherror:
-            message = '第{}个账号验证失败！请检查Cookie是否过期！或者附上报错信息到 https://github.com/GamerNoTitle/wyycg-autosignin/issues 发起issue'.format(
+            message = '第{}个账号验证失败！请检查Cookie是否过期！'.format(
                 cookies.index(i) + 1)
             failure.append(cookie)
             msg.append(message)
@@ -147,7 +153,7 @@ if __name__ == "__main__":
             try:
                 sign_return = signin(sign_url, cookie)
             except:
-                message = '第{}个账号签到失败，回显状态码为{}，具体错误信息如下：{}'.format(cookies.index(i) + 1, sign_return.status_code, sign_return.text)
+                message = '第{}个账号签到失败，请求异常'.format(cookies.index(i) + 1)
                 failure.append(cookie)
                 msg.append(message)
                 signerror = True
@@ -157,49 +163,37 @@ if __name__ == "__main__":
                 success.append(cookie)
                 msg.append(message)
             elif not signerror:
-                message = '第{}个账号签到失败，回显状态码为{}，具体错误信息如下：{}'.format(cookies.index(i) + 1, sign_return.status_code, sign_return.text)
+                message = '第{}个账号签到失败，状态码：{}'.format(cookies.index(i) + 1, sign_return.status_code)
                 failure.append(cookie)
                 msg.append(message)
     outputmsg = str(msg).replace("[", '').replace(']', '').replace(',', '<br>').replace('\'', '')
     teleinfomsg = '''
-    感谢使用来自GamerNoTitle的网易云游戏自动签到脚本！
     今日签到结果如下：
     成功数量：{0}/{2}
     失败数量：{1}/{2}
     具体情况如下：
     {3}
-    GamerNoTitle: https://bili33.top
-    网易云游戏自动签到脚本: https://github.com/GamerNoTitle/wyycg-autocheckin
     '''.format(len(success), len(failure), len(cookies), outputmsg)
     scinfomsg = '''
-    感谢使用来自<a herf='https://bili33.top'>GamerNoTitle</a>的<a herf='https://github.com/GamerNoTitle/wyycg-autocheckin'>网易云游戏自动签到脚本</a>！<br>
     今日签到结果如下：<br>
     成功数量：{0}/{2}<br>
     失败数量：{1}/{2}<br>
     具体情况如下：<br>
     {3}
-    GamerNoTitle: https://bili33.top
-    网易云游戏自动签到脚本: https://github.com/GamerNoTitle/wyycg-autocheckin
     '''.format(len(success), len(failure), len(cookies), outputmsg)
     qqinfomsg = '''
-    感谢使用来自bili33.top GamerNoTitle的网易云游戏自动签到脚本
     今日签到结果如下：
     成功数量：{0}/{2}
     失败数量：{1}/{2}
     具体情况如下：
     {3}
-    GamerNoTitle: https://bili33.top
-    网易云游戏自动签到脚本: https://github.com/GamerNoTitle/wyycg-autocheckin
     '''.format(len(success), len(failure), len(cookies), outputmsg)
     ppinfomsg = '''
-    感谢使用来自bili33.top GamerNoTitle的网易云游戏自动签到脚本
     今日签到结果如下：
     成功数量：{0}/{2}
     失败数量：{1}/{2}
     具体情况如下：
     {3}
-    GamerNoTitle: https://bili33.top
-    网易云游戏自动签到脚本: https://github.com/GamerNoTitle/wyycg-autocheckin
     '''.format(len(success), len(failure), len(cookies), outputmsg)
 
     send(teleid, teleinfomsg)
