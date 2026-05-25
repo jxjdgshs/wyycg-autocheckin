@@ -25,6 +25,6 @@ jobs:
 
       - name: 执行签到脚本
         env:
-          COOKIE: ${{ secrets.COOKIE }}  # 这里已经和你设置的密钥名一致了
+          COOKIE: ${{ secrets.COOKIE }}
         run: |
-          python main.py "${{ secrets.COOKIE }}"
+          python main.py
