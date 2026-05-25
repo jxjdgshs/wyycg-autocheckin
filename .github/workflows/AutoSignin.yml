@@ -27,4 +27,4 @@ jobs:
         env:
           COOKIE: ${{ secrets.COOKIE }}  # 这里已经和你设置的密钥名一致了
         run: |
-          python main.py  # 这里要改成你仓库里签到脚本的实际文件名
+          python main.py "${{ secrets.COOKIE }}"
