@@ -12,7 +12,6 @@ current = 'https://n.cg.163.com/api/v2/client-settings/@current'
 
 
 cookies = sys.argv[1].split('#')
-teleid = sys.argv[2]
 teletoken = sys.argv[3]
 sckey = sys.argv[4]
 qqkey = sys.argv[5]
